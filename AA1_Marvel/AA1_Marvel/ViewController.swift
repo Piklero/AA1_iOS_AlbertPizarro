@@ -53,7 +53,9 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
                     return
                 }
                     
-                self.heroes.insert(contentsOf: heroesResponse.data.result, at: self.heroes.count)
+                self.heroes.insert(contentsOf: heroesResponse.data.results, at: self.heroes.count)
+                //me falta una funcion aqui llamar al thread principal
+                
                 table.reloadData()
             }
             
@@ -94,7 +96,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     
     struct HeroesData: Decodable
     {
-        let result: [Hero]
+        let results: [Hero]
     }
 
     struct Hero : Decodable{
