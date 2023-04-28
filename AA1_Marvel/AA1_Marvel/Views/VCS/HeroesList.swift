@@ -29,6 +29,13 @@ class HeroesListVC: UIViewController, UITableViewDataSource, UITableViewDelegate
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         debugPrint("Hero selected => \(heroes[indexPath.row].name)")
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        if let heroDetailVC = storyboard.instantiateViewController(withIdentifier: "HeroDetail")
+            as? HeroDetailVC {
+            heroDetailVC.CurrentHero = heroes[indexPath.row]
+            
+            self.present(heroDetailVC, animated: true)
+        }
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

@@ -9,8 +9,15 @@ import Foundation
 import UIKit
 
 class HeroDetailVC: UIViewController {
+    public var CurrentHero: Hero?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        if let CurrentHero = CurrentHero {
+            debugPrint(CurrentHero)
+        }
+        
     }
 }
 
