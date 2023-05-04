@@ -33,7 +33,7 @@ class HeroesListVC: UIViewController, UITableViewDataSource, UITableViewDelegate
         if let heroDetailVC = storyboard.instantiateViewController(withIdentifier: "HeroDetail")
             as? HeroDetailVC {
             heroDetailVC.CurrentHero = heroes[indexPath.row]
-            
+            heroDetailVC.modalPresentationStyle = .overFullScreen
             self.present(heroDetailVC, animated: true)
         }
     }
@@ -74,20 +74,13 @@ extension HeroesListVC {
         {
             GetHeroesInProgress = true
             
-            do {
-                try ApiRepository.GetHeroes(offset: heroes.count, limit: 50) { heroes in
-                    
-                    self.GetHeroesInProgress = false
-                    
-                    self.heroes.insert(contentsOf: heroes, at: self.heroes.count)
-                    self.table.reloadData()
-                }
-                
-            } catch let error as ApiRepository.HeroError {
-                debugPrint(error.error)
-            }
-            catch {
-                debugPrint(error)
+            ApiRepository.GetHeroes(offset: heroes.count, limit: 30) { heroes in
+                self.GetHeroesInProgress = false
+                self.heroes.insert(contentsOf: heroes, at: self.heroes.count)
+                self.table.reloadData()
+            } onError: { error in
+                self.GetHeroesInProgress = false
+                debugPrint(error.error.rawValue)
             }
         }
     }

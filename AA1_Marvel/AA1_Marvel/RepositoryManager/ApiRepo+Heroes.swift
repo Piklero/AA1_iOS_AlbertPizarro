@@ -19,31 +19,40 @@ extension ApiRepository {
         let error: HeroErrors
     }
     
-    static func GetHeroes(offset: Int = 0, limit: Int = 20, callback: @escaping ([Hero]) -> () ) throws
+    static func GetHeroes(offset: Int = 0, limit: Int = 20, onSuccess: @escaping ([Hero]) -> (), onError: @escaping (HeroError)->() = {_ in} )
     {
         guard var components = BaseComponents else {
-            throw HeroError(error: .CantCreateUrlWithString)
+            onError(HeroError(error: .CantCreateUrlWithString))
+            return
         }
         
         components.queryItems?.append(URLQueryItem(name: "offset", value: String(offset)))
         components.queryItems?.append(URLQueryItem(name: "limit", value: String(limit)))
         
         guard let url = components.url else {
-            throw HeroError(error: .CantCreateUrl)
+            onError(HeroError(error: .CantCreateUrl))
+            return
         }
         
         let request = URLRequest(url: url)
         
         
-        let task = URLSession.shared.dataTask(with: request){ data, response, error in
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {
+                
+                if error != nil {
+                    DispatchQueue.main.async {
+                        onError(HeroError(error: .Unknown))
+                    }
+                    return
+                }
                 
                 guard let heroesResponse = try? JSONDecoder().decode(HerosResponse.self, from: data) else {
                     return
                 }
                 
                 DispatchQueue.main.async {
-                    callback(heroesResponse.data.results)
+                    onSuccess(heroesResponse.data.results)
                     
                 }
             }
