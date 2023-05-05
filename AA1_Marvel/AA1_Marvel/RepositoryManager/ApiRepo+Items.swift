@@ -1,35 +1,26 @@
 //
-//  ApiRepo+Heroes.swift
+//  ApiRepo+Items.swift
 //  AA1_marvel
 //
-//  Created by Albert Pizarro on 28/4/23.
+//  Created by Albert Pizarro on 4/5/23.
 //
 
 import Foundation
+import UIKit
+
 
 extension MarvelRepository{
-    
-    public struct HeroError: Error {
-        public enum HeroErrors:String{
-            case CantCreateUrlWithString = "Can't create Url with string"
-            case CantCreateUrl = "Can't create url"
-            case CantParseData = "Can't parse data"
-            case Unknown = "Unknown"
-        }
-        let heroError: HeroErrors
-    }
         
-    
-    func GetHeroes(offset: Int = 0, limit: Int = 20, onSuccess: @escaping ([Hero]) -> (), onError: @escaping (HeroError)->() = {_ in }) {
+    func GetComics(heroId: Int, offset: Int = 0, limit: Int = 20, onSuccess: @escaping ([Comic]) -> (), onError: @escaping (HeroError)->() = {_ in })  {
         
         let marvelComp = MarvelUrlComponents()
         
-        marvelComp += .Characters
+        marvelComp += .Comics
         marvelComp
+            .AddCharacters(heroId)
             .AddLimit(limit)
             .AddOffset(offset)
-        
-        
+            
         guard let url = marvelComp.Components.url else{
             onError(HeroError(heroError: .CantCreateUrl))
             return
@@ -48,11 +39,22 @@ extension MarvelRepository{
             
             if let data = data, let _ = String (data: data, encoding: .utf8){
                 
-                guard let heroesResponse = try? JSONDecoder().decode(HeroesRespone.self, from: data) else { return }
-                //print(heroesResponse)
-                
+                guard let comicResponse = try? JSONDecoder().decode(ComicResponse.self, from: data) else {
+                    
+                    DispatchQueue.main.async {
+                        
+                        onError(HeroError(heroError: .CantParseData))
+                        
+                    }
+                    
+                    return
+                    
+                }
+
+                debugPrint(comicResponse)
                 DispatchQueue.main.async {
-                    onSuccess(heroesResponse.data.results)
+                    
+                    onSuccess(comicResponse.data.results)
                     
                 }
             }
@@ -60,4 +62,5 @@ extension MarvelRepository{
         
         task.resume()
     }
+    
 }

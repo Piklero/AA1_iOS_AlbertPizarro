@@ -13,7 +13,10 @@ class HeroesCollectionCell: UICollectionViewCell {
     
     @IBOutlet weak var collectionText: UILabel!
     
-    @IBOutlet weak var collectionImage: UIImageView!
+    @IBOutlet weak var collectionImage: MyImageView!
     
-    
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        // Initialization code
+    }
 }

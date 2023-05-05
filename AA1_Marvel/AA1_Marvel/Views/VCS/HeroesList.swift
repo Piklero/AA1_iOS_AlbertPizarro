@@ -23,7 +23,10 @@ class HeroesListVC: UIViewController, UITableViewDataSource, UITableViewDelegate
         table.dataSource = self
         table.delegate = self
         
-        GetMoreHeroes()
+        Api.Marvel.GetHeroes(onSuccess: { heroes in
+            self.heroes.insert(contentsOf: heroes, at: self.heroes.count)
+            self.table.reloadData()
+        })
         
     }
     
@@ -74,42 +77,17 @@ extension HeroesListVC {
         {
             GetHeroesInProgress = true
             
-            ApiRepository.GetHeroes(offset: heroes.count, limit: 30) { heroes in
+            Api.Marvel.GetHeroes(offset: heroes.count, limit: 30) { heroes in
                 self.GetHeroesInProgress = false
                 self.heroes.insert(contentsOf: heroes, at: self.heroes.count)
                 self.table.reloadData()
             } onError: { error in
                 self.GetHeroesInProgress = false
-                debugPrint(error.error.rawValue)
+                debugPrint(error.heroError.rawValue)
             }
         }
     }
 }
 
-struct HerosResponse: Codable {
-    let code: Int
-    let status: String
-    let data: HeroesData
-}
-
-struct HeroesData: Codable
-{
-    let results: [Hero]
-}
-
-struct Hero : Codable{
-    let id: Int
-    let name: String
-    let description: String
-    let thumbnail: Thumbnail?
-}
-
-struct Thumbnail : Codable{
-    let path: String
-    let `extension`: String
-    
-    var ImageUrl: String { get { return "\(path).\(`extension`)"}}
-    var Url: URL? { get { URL(string: ImageUrl)}}
-}
 
 
