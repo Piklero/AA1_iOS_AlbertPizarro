@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-class HeroDetailVC: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource {
+class HeroDetailVC: UIViewController {
     
     @IBOutlet var returnButton: UIButton!
     @IBOutlet var image: MyImageView!
@@ -16,17 +16,18 @@ class HeroDetailVC: UIViewController, UICollectionViewDelegate, UICollectionView
     @IBOutlet var descriptionText: UITextView!
     
     
-    @IBOutlet weak var collectionTable: UICollectionView!
-    
     
     public var CurrentHero: Hero?
     
-    var comics: [Comic] = []
+    var series: [Serie] = []
+    
+    //variables del PageController
+    
+    var vcs: [UIViewController] = []
+    var pager: UIPageViewController?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        collectionTable.dataSource = self
-        collectionTable.delegate = self
         
         if let CurrentHero = CurrentHero {
             self.text.text = CurrentHero.name
@@ -36,17 +37,33 @@ class HeroDetailVC: UIViewController, UICollectionViewDelegate, UICollectionView
                 self.image.SetImageAsync(url: url)
             }
             
-            Api.Marvel.GetComics(heroId: CurrentHero.id, offset: 0) { comics in
-                self.comics.insert(contentsOf: comics, at: self.comics.count)
-                self.collectionTable.reloadData()
-                
-            } onError: { error in
-                debugPrint(error.heroError.rawValue)
-            }
+           
         }
         
         returnButton.addTarget(self, action:
             #selector(backToHeroList), for: .touchUpInside)
+        
+        //page controller things
+        
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        
+        if let firstVC = storyboard.instantiateViewController(withIdentifier: "red") as? ComicVC {
+            firstVC.CurrentHero = self.CurrentHero
+            vcs.append(firstVC)
+        }
+        
+        if let secondVC = storyboard.instantiateViewController(withIdentifier: "blue") as? SeriesVC {
+            secondVC.CurrentHero = self.CurrentHero
+            vcs.append(secondVC)
+        }
+        
+        if let thirdVC = storyboard.instantiateViewController(withIdentifier: "yellow") as? StoriesVC {
+            thirdVC.CurrentHero = self.CurrentHero
+            vcs.append(thirdVC)
+        }
+        
+        pager?.setViewControllers([vcs[0]], direction: .forward, animated: true)
+        
         
     }
     
@@ -54,29 +71,70 @@ class HeroDetailVC: UIViewController, UICollectionViewDelegate, UICollectionView
         self.dismiss(animated: true)
     }
     
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return comics.count
+    @IBAction func ComicsPress(_ sender: Any) {
+        pager?.setViewControllers([vcs[0]], direction: .forward, animated: true)
     }
     
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell =
-                collectionView.dequeueReusableCell(withReuseIdentifier: "CollectionCell", for: indexPath) as? HeroesCollectionCell
-        else {
-            return UICollectionViewCell()
+    
+    @IBAction func SeriesPress(_ sender: Any) {
+        
+        pager?.setViewControllers([vcs[1]], direction: .forward, animated: true)
+    }
+    
+    
+    @IBAction func StoriesPress(_ sender: Any) {
+        pager?.setViewControllers([vcs[2]], direction: .forward, animated: true)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        debugPrint(segue.identifier)
+        if let pager = segue.destination as? UIPageViewController {
+            
+            self.pager = pager
+            pager.delegate = self
+            pager.dataSource = self
+            
+            
         }
-        
-        let currentComic = self.comics[indexPath.row]
-        
-        if let url = currentComic.thumbnail?.Url{
-            cell.collectionImage.SetImageAsync(url: url)
-        }
-        
-        cell.collectionText.text = currentComic.title
-        
-        
-        
-        
-        return cell
     }
 }
 
+
+extension HeroDetailVC: UIPageViewControllerDelegate, UIPageViewControllerDataSource {
+    
+    
+    func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
+        guard let cur = vcs.firstIndex(of: viewController) else {
+            return nil
+        }
+        
+        if cur == 0 {
+            return nil
+        }
+        
+        var prev = (cur - 1) % vcs.count
+        if prev < 0{
+            prev = vcs.count - 1
+        }
+        return vcs[prev]
+    }
+    
+    func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
+        
+        guard let cur = vcs.firstIndex(of: viewController) else {
+            return nil
+        }
+        
+        if cur == (vcs.count - 1) {
+            return nil
+        }
+        
+        let nxt = abs((cur + 1) % vcs.count)
+        return vcs[nxt]
+    }
+    
+    func presentationIndex(for pageViewController: UIPageViewController) -> Int {
+        return vcs.count
+    }
+    
+}

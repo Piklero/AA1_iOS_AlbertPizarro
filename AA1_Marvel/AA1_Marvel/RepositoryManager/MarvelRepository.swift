@@ -20,6 +20,8 @@ public class MarvelRepository {
         enum SubPath: String {
             case Characters = "characters"
             case Comics = "comics"
+            case Series = "series"
+            case Stories = "stories"
         }
         
         init(){

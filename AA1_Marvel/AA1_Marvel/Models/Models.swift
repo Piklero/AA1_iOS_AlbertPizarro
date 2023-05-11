@@ -47,3 +47,35 @@ struct Comic: Codable {
     let title: String
     let thumbnail: Thumbnail?
 }
+
+struct SeriesResponse: Codable {
+    let code: Int
+    let status :String
+    let data: SeriesData
+}
+
+struct SeriesData: Codable {
+    let results: [Serie]
+}
+
+struct Serie: Codable {
+    let id: Int
+    let title: String
+    let thumbnail: Thumbnail?
+}
+
+struct StoriesResponse: Codable {
+    let code: Int
+    let status :String
+    let data: StoriesData
+}
+
+struct StoriesData: Codable {
+    let results: [Story]
+}
+
+struct Story: Codable {
+    let id: Int
+    let title: String
+    let thumbnail: Thumbnail?
+}
