@@ -13,7 +13,11 @@ class HeroesListVC: UIViewController, UITableViewDataSource, UITableViewDelegate
     
     @IBOutlet weak var table: UITableView!
     
+    @IBOutlet weak var searchBar: UITextField!
+
+    
     var heroes: [Hero] = []
+    var filteredHeroes: [Hero] = []
     
     var GetHeroesInProgress: Bool = false
     
@@ -67,6 +71,10 @@ class HeroesListVC: UIViewController, UITableViewDataSource, UITableViewDelegate
         return cell
         
     }
+    @IBAction func StartSeach() {
+    
+        debugPrint("entra")
+    }
     
 }
 
@@ -88,6 +96,8 @@ extension HeroesListVC {
         }
     }
 }
+
+
 
 
 
